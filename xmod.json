@@ -1,5 +1,6 @@
 {
-    "archiveName": "bob.zip",
+    "id": "mej_xmod_test",
+    "archiveName": "{id}_{date}.zip",
     "excludePaths": [
         "^obj/"
     ]

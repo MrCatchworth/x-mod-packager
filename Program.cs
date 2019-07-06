@@ -50,12 +50,11 @@ namespace XModPackager
             var outputFileName = new TemplateProcessor(GetTemplateSpecs(config)).Process(config.ArchiveName);
 
             Directory.CreateDirectory(config.ArchiveDirectory);
-            var outputPath = Path.Join(config.ArchiveDirectory, config.ArchiveName);
+            var outputPath = Path.Join(config.ArchiveDirectory, outputFileName);
 
             using (var zipFile = new ZipFile(outputPath))
             {
                 zipFile.AddFiles(filesToPackage);
-
                 zipFile.Save();
             }
         }

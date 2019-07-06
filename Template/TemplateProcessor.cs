@@ -1,6 +1,7 @@
 using System.Linq;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using System;
 
 namespace XModPackager.Template
 {
@@ -17,7 +18,7 @@ namespace XModPackager.Template
         public string Process(string input)
         {
             return TemplateRegex.Replace(input, match => {
-                var templateText = match.Groups[0].Value;
+                var templateText = match.Groups[1].Value;
 
                 var matchingSpec = templateSpecs.First(spec => spec.Text == templateText);
                 return matchingSpec.Process(templateText);
