@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System.Text;
+using System.Text.RegularExpressions;
+using System.IO;
 using System;
 using XModPackager.Config.Models;
 using Newtonsoft.Json;
@@ -16,11 +18,39 @@ namespace XModPackager
             return new TemplateSpec[] {
                 new TemplateSpec {
                     Text = "id",
-                    Process = text => config.Id
+                    Process = text => config.ModDetails.Id
                 },
                 new TemplateSpec {
                     Text = "date",
                     Process = text => DateTime.Now.ToString("dd-MM-yyyy")
+                },
+                new TemplateSpec {
+                    Text = "title",
+                    Process = text => {
+                        var rawTitle = config.ModDetails.Title;
+
+                        rawTitle = Regex.Replace(rawTitle, @"(?:\s|\.)+", "-");
+                        rawTitle = Regex.Replace(rawTitle, @"[^A-Za-z0-9\-_]+", "");
+                        rawTitle = rawTitle.Trim('-', '_');
+
+                        return rawTitle;
+                    }
+                },
+                new TemplateSpec {
+                    Text = "version",
+                    Process = text => {
+                        var rawVersion = config.ModDetails.Version;
+
+                        var builder = new StringBuilder();
+
+                        builder.Append(rawVersion[0]);
+                        builder.Append('-');
+                        builder.Append(rawVersion[1]);
+                        builder.Append('-');
+                        builder.Append(rawVersion[2]);
+
+                        return builder.ToString();
+                    }
                 }
             };
         }
@@ -29,7 +59,7 @@ namespace XModPackager
         {
             try
             {
-                return JsonConvert.DeserializeObject<ConfigModel>(File.ReadAllText(PathConstants.ConfigPath));
+                return JsonConvert.DeserializeObject<ConfigModel>(File.ReadAllText(PathUtils.ConfigPath));
             }
             catch (Exception e)
             {
@@ -38,14 +68,9 @@ namespace XModPackager
             }
         }
 
-        static void Main(string[] args)
+        private static void CreateArchive(ConfigModel config)
         {
-            var currentDir = Directory.GetCurrentDirectory();
-
-            var config = LoadConfig();
-            ConfigDefaults.ApplyDefaultConfig(config);
-
-            var filesToPackage = new PackagedPathsProcessor(config).GetPackagedPaths(currentDir);
+            var filesToPackage = new PackagedPathsProcessor(config).GetPackagedPaths(Directory.GetCurrentDirectory());
 
             var outputFileName = new TemplateProcessor(GetTemplateSpecs(config)).Process(config.ArchiveName);
 
@@ -57,6 +82,14 @@ namespace XModPackager
                 zipFile.AddFiles(filesToPackage);
                 zipFile.Save();
             }
+        }
+
+        static void Main(string[] args)
+        {
+            var config = LoadConfig();
+            ConfigDefaults.ApplyDefaultConfig(config);
+
+            CreateArchive(config);
         }
     }
 }

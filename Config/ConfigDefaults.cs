@@ -6,12 +6,11 @@ namespace XModPackager.Config
 {
     public class ConfigDefaults
     {
-        public static readonly string DefaultArchiveName = "{id}_{date}";
+        public static readonly string DefaultArchiveName = "{id}_{date}.zip";
         public static readonly IList<string> DefaultExcludePaths = new string[] {
             @"^xmod\.json$",
             @"^\."
         };
-        public static readonly string DefaultArchiveDirectory = ".xmodbuild";
 
         public static void ApplyDefaultConfig(ConfigModel config)
         {
@@ -31,7 +30,17 @@ namespace XModPackager.Config
 
             if (config.ArchiveDirectory == null)
             {
-                config.ArchiveDirectory = DefaultArchiveDirectory;
+                config.ArchiveDirectory = PathUtils.OutputPath;
+            }
+
+            if (config.ModDetails.Version == null)
+            {
+                config.ModDetails.Version = "100";
+            }
+
+            if (!config.ModDetails.SaveDependent.HasValue)
+            {
+                config.ModDetails.SaveDependent = true;
             }
         }
     }

@@ -1,6 +1,11 @@
 {
-    "id": "mej_xmod_test",
-    "archiveName": "{id}_{date}.zip",
+    "modDetails": {
+        "id": "jimble_mod",
+        "title": "Jimble's Funky Mod (beta)",
+        "version": "150"
+    },
+
+    "archiveName": "{title}_{version}_{date}.zip",
     "excludePaths": [
         "^obj/"
     ]

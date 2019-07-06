@@ -20,7 +20,13 @@ namespace XModPackager.Template
             return TemplateRegex.Replace(input, match => {
                 var templateText = match.Groups[1].Value;
 
-                var matchingSpec = templateSpecs.First(spec => spec.Text == templateText);
+                var matchingSpec = templateSpecs.FirstOrDefault(spec => spec.Text == templateText);
+
+                if (matchingSpec == null)
+                {
+                    throw new ArgumentException($"Unrecognised template \"{templateText}\" at position {match.Groups[1].Index}");
+                }
+
                 return matchingSpec.Process(templateText);
             });
         }
