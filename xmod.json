@@ -1,0 +1,6 @@
+{
+    "archiveName": "bob.zip",
+    "excludePaths": [
+        "^obj/"
+    ]
+}
