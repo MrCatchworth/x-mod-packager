@@ -350,3 +350,4 @@ MigrationBackup/
 
 # domain-specific
 .xmodbuild/
+content.xml

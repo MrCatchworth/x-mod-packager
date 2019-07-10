@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Xml;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.IO;
 using System;
@@ -8,6 +9,9 @@ using XModPackager.Config;
 using XModPackager.Template;
 using System.Collections.Generic;
 using Ionic.Zip;
+using CommandLine;
+using XModPackager.Options;
+using XModPackager.Content;
 
 namespace XModPackager
 {
@@ -70,6 +74,18 @@ namespace XModPackager
 
         private static void CreateArchive(ConfigModel config)
         {
+            var contentBuilder = new ContentBuilder(config, false);
+            var contentDocument = contentBuilder.BuildContent();
+
+            using (
+                var contentWriter = XmlWriter.Create("content.xml", new XmlWriterSettings {
+                    Indent = true,
+                    IndentChars = "    "
+                })
+            ) {
+                contentDocument.WriteTo(contentWriter);
+            }
+
             var filesToPackage = new PackagedPathsProcessor(config).GetPackagedPaths(Directory.GetCurrentDirectory());
 
             var outputFileName = new TemplateProcessor(GetTemplateSpecs(config)).Process(config.ArchiveName);
@@ -89,7 +105,8 @@ namespace XModPackager
             var config = LoadConfig();
             ConfigDefaults.ApplyDefaultConfig(config);
 
-            CreateArchive(config);
+            Parser.Default.ParseArguments<PackageOptions>(args)
+                .WithParsed(packageOptions => CreateArchive(config));
         }
     }
 }

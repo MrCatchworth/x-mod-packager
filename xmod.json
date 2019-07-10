@@ -5,7 +5,7 @@
         "version": "150"
     },
 
-    "archiveName": "{title}_{version}_{date}.zip",
+    "archiveName": "{id}_v{version}.zip",
     "excludePaths": [
         "^obj/"
     ]
