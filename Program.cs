@@ -72,17 +72,20 @@ namespace XModPackager
             }
         }
 
-        private static void CreateArchive(ConfigModel config)
+        private static void BuildMod(BuildOptions options, ConfigModel config)
         {
             var contentBuilder = new ContentBuilder(config, false);
             var contentDocument = contentBuilder.BuildContent();
+            var contentStream = new MemoryStream();
 
             using (
-                var contentWriter = XmlWriter.Create("content.xml", new XmlWriterSettings {
+                var contentWriter = XmlWriter.Create(contentStream, new XmlWriterSettings
+                {
                     Indent = true,
                     IndentChars = "    "
                 })
-            ) {
+            )
+            {
                 contentDocument.WriteTo(contentWriter);
             }
 
@@ -91,12 +94,30 @@ namespace XModPackager
             var outputFileName = new TemplateProcessor(GetTemplateSpecs(config)).Process(config.ArchiveName);
 
             Directory.CreateDirectory(config.ArchiveDirectory);
-            var outputPath = Path.Join(config.ArchiveDirectory, outputFileName);
 
-            using (var zipFile = new ZipFile(outputPath))
+            if (options.Loose)
             {
-                zipFile.AddFiles(filesToPackage);
-                zipFile.Save();
+                foreach (var filePath in filesToPackage)
+                {
+                    Console.WriteLine($"Creating file: {filePath}");
+                    Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+                    File.Copy(filePath, Path.Join(config.ArchiveDirectory, filePath));
+                }
+
+                using (var contentFileStream = new FileStream(Path.Join(config.ArchiveDirectory, "content.xml"), FileMode.Create))
+                {
+                    contentStream.WriteTo(contentFileStream);
+                }
+            }
+            else
+            {
+                var outputPath = Path.Join(config.ArchiveDirectory, outputFileName);
+                using (var zipFile = new ZipFile(outputPath))
+                {
+                    zipFile.AddFiles(filesToPackage);
+                    zipFile.UpdateEntry("content.xml", new StreamReader(contentStream).ReadToEnd());
+                    zipFile.Save();
+                }
             }
         }
 
@@ -105,8 +126,8 @@ namespace XModPackager
             var config = LoadConfig();
             ConfigDefaults.ApplyDefaultConfig(config);
 
-            Parser.Default.ParseArguments<PackageOptions>(args)
-                .WithParsed(packageOptions => CreateArchive(config));
+            Parser.Default.ParseArguments<BuildOptions>(args)
+                .WithParsed(options => BuildMod(options, config));
         }
     }
 }

@@ -68,7 +68,7 @@ namespace XModPackager.Content
 
             if (langElement == null)
             {
-                langElement = new XElement("language");
+                langElement = new XElement("text");
                 contentDocument.Root.Add(langElement);
             }
 
