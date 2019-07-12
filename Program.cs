@@ -12,6 +12,7 @@ using Ionic.Zip;
 using CommandLine;
 using XModPackager.Options;
 using XModPackager.Content;
+using XModPackager.Build;
 
 namespace XModPackager
 {
@@ -76,10 +77,10 @@ namespace XModPackager
         {
             var contentBuilder = new ContentBuilder(config, false);
             var contentDocument = contentBuilder.BuildContent();
-            var contentStream = new MemoryStream();
+            var contentStringBuilder = new StringBuilder();
 
             using (
-                var contentWriter = XmlWriter.Create(contentStream, new XmlWriterSettings
+                var contentWriter = XmlWriter.Create(contentStringBuilder, new XmlWriterSettings
                 {
                     Indent = true,
                     IndentChars = "    "
@@ -91,34 +92,26 @@ namespace XModPackager
 
             var filesToPackage = new PackagedPathsProcessor(config).GetPackagedPaths(Directory.GetCurrentDirectory());
 
-            var outputFileName = new TemplateProcessor(GetTemplateSpecs(config)).Process(config.ArchiveName);
+            var archiveName = new TemplateProcessor(GetTemplateSpecs(config)).Process(config.ArchiveName);
 
             Directory.CreateDirectory(config.ArchiveDirectory);
 
+            IModFilesBuilder builder;
+            string buildOutputPath;
             if (options.Loose)
             {
-                foreach (var filePath in filesToPackage)
-                {
-                    Console.WriteLine($"Creating file: {filePath}");
-                    Directory.CreateDirectory(Path.GetDirectoryName(filePath));
-                    File.Copy(filePath, Path.Join(config.ArchiveDirectory, filePath));
-                }
-
-                using (var contentFileStream = new FileStream(Path.Join(config.ArchiveDirectory, "content.xml"), FileMode.Create))
-                {
-                    contentStream.WriteTo(contentFileStream);
-                }
+                builder = new LooseModFilesBuilder();
+                buildOutputPath = config.ArchiveDirectory;
             }
             else
             {
-                var outputPath = Path.Join(config.ArchiveDirectory, outputFileName);
-                using (var zipFile = new ZipFile(outputPath))
-                {
-                    zipFile.AddFiles(filesToPackage);
-                    zipFile.UpdateEntry("content.xml", new StreamReader(contentStream).ReadToEnd());
-                    zipFile.Save();
-                }
+                builder = new ArchiveModFilesBuilder();
+                buildOutputPath = Path.Combine(config.ArchiveDirectory, archiveName);
             }
+
+            builder.BuildModFiles(buildOutputPath, filesToPackage, new Dictionary<string, string> {
+                ["content.xml"] = contentStringBuilder.ToString()
+            });
         }
 
         static void Main(string[] args)
