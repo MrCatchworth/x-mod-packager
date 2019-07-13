@@ -5,8 +5,10 @@
         "version": "150"
     },
 
-    "archiveName": "{id}_v{version}.zip",
-    "excludePaths": [
-        "^obj/"
-    ]
+    "build": {
+        "archiveName": "{id}_v{version}.zip",
+        "excludePaths": [
+            "^obj/"
+        ]
+    }
 }

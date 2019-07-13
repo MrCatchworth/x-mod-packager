@@ -92,10 +92,10 @@ namespace XModPackager
 
             var filesToPackage = new PackagedPathsProcessor(config).GetPackagedPaths(Directory.GetCurrentDirectory());
 
-            Directory.CreateDirectory(config.ArchiveDirectory);
+            Directory.CreateDirectory(config.Build.OutputDirectory);
 
             IModFilesBuilder builder;
-            var buildOutputPath = config.ArchiveDirectory;
+            var buildOutputPath = config.Build.OutputDirectory;
             if (options.Loose)
             {
                 builder = new LooseModFilesBuilder();

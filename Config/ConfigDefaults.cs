@@ -16,13 +16,13 @@ namespace XModPackager.Config
 
         public static void ApplyDefaultConfig(ConfigModel config)
         {
-            if (config.ExcludePaths == null)
+            if (config.Build.ExcludePaths == null)
             {
-                config.ExcludePaths = new List<string>(DefaultExcludePaths).ToArray();
+                config.Build.ExcludePaths = new List<string>(DefaultExcludePaths).ToArray();
             }
             else
             {
-                config.ExcludePaths = config.ExcludePaths.Concat(DefaultExcludePaths).ToArray();
+                config.Build.ExcludePaths = config.Build.ExcludePaths.Concat(DefaultExcludePaths).ToArray();
             }
 
             if (config.ModDetails.Dependencies == null)
@@ -30,14 +30,14 @@ namespace XModPackager.Config
                 config.ModDetails.Dependencies = new ConfigDependencyModel[0];
             }
 
-            if (config.ArchiveName == null)
+            if (config.Build.ArchiveName == null)
             {
-                config.ArchiveName = DefaultArchiveName;
+                config.Build.ArchiveName = DefaultArchiveName;
             }
 
-            if (config.ArchiveDirectory == null)
+            if (config.Build.OutputDirectory == null)
             {
-                config.ArchiveDirectory = PathUtils.OutputPath;
+            config.Build.OutputDirectory = PathUtils.OutputPath;
             }
 
             if (config.ModDetails.Version == null)

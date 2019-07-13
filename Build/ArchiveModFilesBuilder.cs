@@ -24,12 +24,12 @@ namespace XModPackager.Build
 
         public void BuildModFiles(string outputDirectory, IEnumerable<string> filesFromDisk, IDictionary<string, string> filesFromMemory)
         {
-            if (config.ArchiveName == null)
+            if (config.Build.ArchiveName == null)
             {
                 throw new ArgumentException("Cannot build mod to archive when an archive name/template is not supplied");
             }
 
-            var archiveFileName = processor.Process(config.ArchiveName);
+            var archiveFileName = processor.Process(config.Build.ArchiveName);
             var archivePath = Path.Combine(outputDirectory, archiveFileName);
 
             using (var zipFile = new ZipFile())
