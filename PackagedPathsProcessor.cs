@@ -17,7 +17,10 @@ namespace XModPackager
 
         private IList<Regex> getExclusionRegexes()
         {
-            return configModel.Build.ExcludePaths.Select(exclude => new Regex(exclude)).ToList();
+            return configModel.Build.ExcludePaths
+                .Select(exclude => new Regex(exclude))
+                .Append(new Regex("^" + Regex.Escape(configModel.Build.OutputDirectory)))
+                .ToList();
         }
 
         private string normalisePath(string basePath, string path)

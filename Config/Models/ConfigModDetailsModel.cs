@@ -1,17 +1,26 @@
 using System;
 using System.Collections.Generic;
+using Newtonsoft.Json;
+
 namespace XModPackager.Config.Models
 {
     public class ConfigModDetailsModel
     {
         private string version;
 
+        [JsonProperty(Required = Required.Always)]
         public string Id { get; set; }
+
+        [JsonProperty(Required = Required.Always)]
         public string Title { get; set; }
-        public string Description { get; set; }
+        public string Description { get; set; } = "";
+
+        [JsonProperty(Required = Required.Always)]
         public string Author { get; set; }
-        public Dictionary<string, ConfigLangModel> Langs { get; set; }
-        public IEnumerable<ConfigDependencyModel> Dependencies { get; set; }
+        public Dictionary<string, ConfigLangModel> Langs { get; set; } = new Dictionary<string, ConfigLangModel>();
+        public IEnumerable<ConfigDependencyModel> Dependencies { get; set; } = new List<ConfigDependencyModel>();
+
+        [JsonProperty(Required = Required.Always)]
         public string Version
         {
             get => version;
@@ -27,7 +36,7 @@ namespace XModPackager.Config.Models
                 version = value;
             }
         }
-        public bool? SaveDependent { get; set; }
+        public bool? SaveDependent { get; set; } = true;
 
         public ConfigLangModel GetInfoForLanguage(string langId)
         {

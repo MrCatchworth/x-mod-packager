@@ -1,10 +1,13 @@
-using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace XModPackager.Config.Models
 {
     public class ConfigModel
     {
-        public ConfigModDetailsModel ModDetails { get; set; }
-        public ConfigBuildModel Build {get; set;}
+        [JsonProperty(Required = Required.Always)]
+        public ConfigModDetailsModel ModDetails { get; set; } = new ConfigModDetailsModel();
+
+        [JsonProperty(Required = Required.Always)]
+        public ConfigBuildModel Build {get; set;} = new ConfigBuildModel();
     }
 }

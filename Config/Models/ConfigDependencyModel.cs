@@ -1,4 +1,5 @@
 using System;
+using Newtonsoft.Json;
 
 namespace XModPackager.Config.Models
 {
@@ -6,9 +7,10 @@ namespace XModPackager.Config.Models
     {
         private string version;
 
+        [JsonProperty(Required = Required.Always)]
         public string Id { get; set; }
         public string WorkshopId { get; set; }
-        public bool? Optional { get; set; }
+        public bool? Optional { get; set; } = false;
         public string Version
         {
             get => version;

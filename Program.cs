@@ -113,7 +113,6 @@ namespace XModPackager
         static void Main(string[] args)
         {
             var config = LoadConfig();
-            ConfigDefaults.ApplyDefaultConfig(config);
 
             Parser.Default.ParseArguments<BuildOptions>(args)
                 .WithParsed(options => BuildMod(options, config));
