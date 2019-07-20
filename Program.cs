@@ -90,7 +90,7 @@ namespace XModPackager
                 contentDocument.WriteTo(contentWriter);
             }
 
-            var filesToPackage = new PackagedPathsProcessor(config).GetPackagedPaths(Directory.GetCurrentDirectory());
+            var filesToPackage = new BuildPathsProcessor(config).GetPathsToBuild(Directory.GetCurrentDirectory());
 
             Directory.CreateDirectory(config.Build.OutputDirectory);
 

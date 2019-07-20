@@ -6,11 +6,11 @@ using XModPackager.Config.Models;
 
 namespace XModPackager
 {
-    public class PackagedPathsProcessor
+    public class BuildPathsProcessor
     {
         private readonly ConfigModel configModel;
 
-        public PackagedPathsProcessor(ConfigModel config)
+        public BuildPathsProcessor(ConfigModel config)
         {
             configModel = config;
         }
@@ -28,7 +28,7 @@ namespace XModPackager
             return Path.GetRelativePath(basePath, path).Replace('\\', '/');
         }
 
-        public IList<string> GetPackagedPaths(string basePath)
+        public IList<string> GetPathsToBuild(string basePath)
         {
             var exclusions = getExclusionRegexes();
             var rawPaths = Directory.GetFiles(basePath, "*", SearchOption.AllDirectories);
