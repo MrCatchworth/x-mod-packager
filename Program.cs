@@ -65,6 +65,22 @@ namespace XModPackager
             return JsonConvert.DeserializeObject<ConfigModel>(File.ReadAllText(PathUtils.ConfigPath));
         }
 
+        private static void CleanOutputDirectory(CleanOptions options, ConfigModel config)
+        {
+            Logger.Log(LogCategory.Info, "Cleaning output folder " + config.Build.OutputDirectory);
+
+            DirectoryInfo di = new DirectoryInfo(config.Build.OutputDirectory);
+
+            foreach (FileInfo file in di.GetFiles())
+            {
+                file.Delete(); 
+            }
+            foreach (DirectoryInfo dir in di.GetDirectories())
+            {
+                dir.Delete(true); 
+            }
+        }
+
         private static void BuildMod(BuildOptions options, ConfigModel config)
         {
             var contentBuilder = new ContentBuilder(config, false);
@@ -148,8 +164,9 @@ namespace XModPackager
 
             try
             {
-                Parser.Default.ParseArguments<BuildOptions>(args)
-                    .WithParsed(options => BuildMod(options, config));
+                Parser.Default.ParseArguments<BuildOptions, CleanOptions>(args)
+                    .WithParsed((BuildOptions options) => BuildMod(options, config))
+                    .WithParsed((CleanOptions options) => CleanOutputDirectory(options, config));
             }
             catch (Exception e)
             {
