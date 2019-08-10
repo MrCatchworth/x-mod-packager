@@ -32,12 +32,12 @@ namespace XModPackager.Content
 
             if (root == null)
             {
-                throw new ArgumentException("Invalid document");
+                throw new ArgumentException("Content document has no root element");
             }
 
             if (root.Name != "content")
             {
-                throw new ArgumentException("Invalid document");
+                throw new ArgumentException("Content document's root element is not a \"content\" tag");
             }
         }
 

@@ -1,4 +1,5 @@
-﻿using System.Xml;
+﻿using System.Xml.Linq;
+using System.Xml;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.IO;
@@ -13,6 +14,7 @@ using CommandLine;
 using XModPackager.Options;
 using XModPackager.Content;
 using XModPackager.Build;
+using XModPackager.Logging;
 
 namespace XModPackager
 {
@@ -62,21 +64,23 @@ namespace XModPackager
 
         static ConfigModel LoadConfig()
         {
-            try
-            {
-                return JsonConvert.DeserializeObject<ConfigModel>(File.ReadAllText(PathUtils.ConfigPath));
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("Failed to load config: " + e.Message);
-                return null;
-            }
+            return JsonConvert.DeserializeObject<ConfigModel>(File.ReadAllText(PathUtils.ConfigPath));
         }
 
         private static void BuildMod(BuildOptions options, ConfigModel config)
         {
             var contentBuilder = new ContentBuilder(config, false);
-            var contentDocument = contentBuilder.BuildContent();
+
+            XDocument contentDocument;
+            try
+            {
+                contentDocument = contentBuilder.BuildContent();
+            }
+            catch (Exception e)
+            {
+                throw new Exception("Failed to build content.xml output: " + e.Message, e);
+            }
+
             var contentStringBuilder = new StringBuilder();
 
             using (
@@ -92,7 +96,18 @@ namespace XModPackager
 
             var filesToPackage = new BuildPathsProcessor(config).GetPathsToBuild(Directory.GetCurrentDirectory());
 
-            Directory.CreateDirectory(config.Build.OutputDirectory);
+            try
+            {
+                Logger.Log(LogCategory.Info, "Building mod to directory " + config.Build.OutputDirectory);
+                Directory.CreateDirectory(config.Build.OutputDirectory);
+            }
+            catch (Exception e)
+            {
+                throw new Exception(
+                    $"Failed to create build output directory at {config.Build.OutputDirectory}: " + e.Message,
+                    e
+                );
+            }
 
             IModFilesBuilder builder;
             var buildOutputPath = config.Build.OutputDirectory;
@@ -101,12 +116,15 @@ namespace XModPackager
             {
                 case BuildMethod.Loose:
                     builder = new LooseModFilesBuilder();
+                    Logger.Log(LogCategory.Info, "Using build method: loose files");
                     break;
                 case BuildMethod.Archive:
                     builder = new ArchiveModFilesBuilder(config, GetTemplateSpecs(config));
+                    Logger.Log(LogCategory.Info, "Using build method: zip archive");
                     break;
                 case BuildMethod.Cat:
                     builder = new CatModFilesBuilder(config);
+                    Logger.Log(LogCategory.Info, "Using build method: catalogs");
                     break;
                 default:
                     throw new ArgumentException("Invalid build method: " + config.Build.Method);
@@ -117,12 +135,30 @@ namespace XModPackager
             });
         }
 
-        static void Main(string[] args)
+        static int Main(string[] args)
         {
-            var config = LoadConfig();
+            ConfigModel config;
+            try
+            {
+                config = LoadConfig();
+            }
+            catch (Exception e)
+            {
+                Logger.Log(LogCategory.Fatal, "Failed to load config: " + e.Message);
+                return 1;
+            }
 
-            Parser.Default.ParseArguments<BuildOptions>(args)
-                .WithParsed(options => BuildMod(options, config));
+            try
+            {
+                Parser.Default.ParseArguments<BuildOptions>(args)
+                    .WithParsed(options => BuildMod(options, config));
+            }
+            catch (Exception e)
+            {
+                Logger.Log(LogCategory.Fatal, e.Message);
+            }
+
+            return 0;
         }
     }
 }
