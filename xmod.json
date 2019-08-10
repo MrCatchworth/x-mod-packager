@@ -7,6 +7,13 @@
     },
 
     "build": {
+        "method": "cat",
+        "cats": {
+            "ext_01": [
+                ".*"
+            ]
+        },
+
         "archiveName": "{id}_v{version}.zip",
         "excludePaths": [
             "^obj/"

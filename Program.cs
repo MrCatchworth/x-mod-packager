@@ -96,13 +96,20 @@ namespace XModPackager
 
             IModFilesBuilder builder;
             var buildOutputPath = config.Build.OutputDirectory;
-            if (options.Loose)
+
+            switch (config.Build.Method)
             {
-                builder = new LooseModFilesBuilder();
-            }
-            else
-            {
-                builder = new ArchiveModFilesBuilder(config, GetTemplateSpecs(config));
+                case BuildMethod.Loose:
+                    builder = new LooseModFilesBuilder();
+                    break;
+                case BuildMethod.Archive:
+                    builder = new ArchiveModFilesBuilder(config, GetTemplateSpecs(config));
+                    break;
+                case BuildMethod.Cat:
+                    builder = new CatModFilesBuilder(config);
+                    break;
+                default:
+                    throw new ArgumentException("Invalid build method: " + config.Build.Method);
             }
 
             builder.BuildModFiles(buildOutputPath, filesToPackage, new Dictionary<string, string> {
