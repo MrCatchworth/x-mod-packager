@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using Ionic.Zip;
 using XModPackager.Config.Models;
 using XModPackager.Template;
+using XModPackager.Logging;
 
 namespace XModPackager.Build
 {
@@ -32,20 +33,29 @@ namespace XModPackager.Build
             var archiveFileName = processor.Process(config.Build.ArchiveName);
             var archivePath = Path.Combine(outputDirectory, archiveFileName);
 
+            Logger.Log(LogCategory.Info, "Building mod to zip archive " + archivePath);
+
             using (var zipFile = new ZipFile())
             {
                 var filesFromDiskOnly = filesFromDisk.Where(file => (
                     !filesFromMemory.Keys.Contains(file)
                 ));
 
-                foreach (var fileFromMemory in filesFromMemory)
+                try
                 {
-                    zipFile.UpdateEntry(fileFromMemory.Key, fileFromMemory.Value);
+                    foreach (var fileFromMemory in filesFromMemory)
+                    {
+                        zipFile.UpdateEntry(fileFromMemory.Key, fileFromMemory.Value);
+                    }
+
+                    zipFile.AddFiles(filesFromDiskOnly);
+
+                    zipFile.Save(archivePath);
                 }
-
-                zipFile.AddFiles(filesFromDiskOnly);
-
-                zipFile.Save(archivePath);
+                catch (Exception e)
+                {
+                    throw new Exception("Failed to build mod archive: " + e.Message, e);
+                }
             }
         }
     }

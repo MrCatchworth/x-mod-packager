@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Collections.Generic;
 using XModPackager.Build.XTools;
 using XModPackager.Config.Models;
+using XModPackager.Logging;
 
 namespace XModPackager.Build
 {
@@ -19,6 +20,7 @@ namespace XModPackager.Build
         public void BuildModFiles(string outputPath, IEnumerable<string> filesFromDisk, IDictionary<string, string> filesFromMemory)
         {
             var catToolPath = XToolsUtils.GetXCatToolPath();
+            Logger.Log(LogCategory.Info, "XRCatTool executable located at " + catToolPath);
 
             if (catToolPath == null)
             {
@@ -35,6 +37,8 @@ namespace XModPackager.Build
 
                 var catPath = catInfo.Key + ".cat";
                 var catIncludes = catInfo.Value;
+
+                Logger.Log(LogCategory.Info, "Creating catalog: " + catPath);
 
                 // Build from current directory
                 processStartInfo.ArgumentList.Add("-in");

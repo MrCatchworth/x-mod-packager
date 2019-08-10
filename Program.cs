@@ -158,6 +158,7 @@ namespace XModPackager
                 Logger.Log(LogCategory.Fatal, e.Message);
             }
 
+            Logger.Log(LogCategory.Info, "Done!");
             return 0;
         }
     }
