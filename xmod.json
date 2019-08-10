@@ -7,13 +7,14 @@
     },
 
     "build": {
-        "method": "cat",
+        "method": "archive",
         "cats": {
             "ext_01": [
                 ".*"
             ]
         },
 
+        "outputDirectory": ".xmodbuild",
         "archiveName": "{id}_v{version}.zip",
         "excludePaths": [
             "^obj/"

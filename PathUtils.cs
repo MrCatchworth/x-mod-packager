@@ -49,5 +49,30 @@ namespace XModPackager
 
             return null;
         }
+
+        public static void CheckOutputPath(string rawOutputPath)
+        {
+            if (File.Exists(rawOutputPath))
+            {
+                throw new Exception($"Cannot use output path {rawOutputPath}, it already exists as a file");
+            }
+
+            var currentDir = Path.GetFullPath(Directory.GetCurrentDirectory() + "/");
+            var fullOutputPath = Path.GetFullPath(rawOutputPath + "/");
+
+            if (currentDir.StartsWith(fullOutputPath))
+            {
+                throw new Exception(
+                    string.Join('\n', new string[] {
+                        "Your output directory:",
+                        fullOutputPath,
+                        "Is the same or a parent of the current directory:",
+                        currentDir,
+                        "This is too unsafe to allow (running the clean command would delete your project).",
+                        "Please check your config file and correct the output path."
+                    })
+                );
+            }
+        }
     }
 }

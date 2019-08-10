@@ -40,7 +40,7 @@ namespace XModPackager.Logging
         {
             var headerText = "[" + LogHeaders[level] + "] ";
 
-            return LogHeaderPositionRegex.Replace(message, match => headerText + match);
+            return LogHeaderPositionRegex.Replace(message, match => match + headerText);
         }
 
         public static void Log(LogCategory level, string message)

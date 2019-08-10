@@ -164,6 +164,8 @@ namespace XModPackager
 
             try
             {
+                PathUtils.CheckOutputPath(config.Build.OutputDirectory);
+
                 Parser.Default.ParseArguments<BuildOptions, CleanOptions>(args)
                     .WithParsed((BuildOptions options) => BuildMod(options, config))
                     .WithParsed((CleanOptions options) => CleanOutputDirectory(options, config));
