@@ -6,10 +6,8 @@ using System.IO;
 using System;
 using XModPackager.Config.Models;
 using Newtonsoft.Json;
-using XModPackager.Config;
 using XModPackager.Template;
 using System.Collections.Generic;
-using Ionic.Zip;
 using CommandLine;
 using XModPackager.Options;
 using XModPackager.Content;
@@ -156,6 +154,7 @@ namespace XModPackager
             catch (Exception e)
             {
                 Logger.Log(LogCategory.Fatal, e.Message);
+                return 1;
             }
 
             Logger.Log(LogCategory.Info, "Done!");
