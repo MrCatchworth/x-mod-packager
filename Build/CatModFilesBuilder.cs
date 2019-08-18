@@ -17,15 +17,16 @@ namespace XModPackager.Build
             this.config = config;
         }
 
-        public void BuildModFiles(string outputPath, IEnumerable<string> filesFromDisk, IDictionary<string, string> filesFromMemory)
+        public void BuildModFiles(string outputPath, IEnumerable<string> filesFromDisk, string contentFileText)
         {
             var catToolPath = XToolsUtils.GetXCatToolPath();
-            Logger.Log(LogCategory.Info, "XRCatTool executable located at " + catToolPath);
 
             if (catToolPath == null)
             {
                 throw new InvalidOperationException("Failed to determine path of cat tool executable");
             }
+
+            Logger.Log(LogCategory.Info, "XRCatTool executable located at " + catToolPath);
 
             foreach (var catInfo in config.Build.Cats)
             {
@@ -74,7 +75,8 @@ namespace XModPackager.Build
                     }
                 }
 
-                
+                var contentPath = Path.Combine(config.Build.OutputDirectory, "content.xml");
+                File.WriteAllText(contentPath, contentFileText);
             }
         }
     }

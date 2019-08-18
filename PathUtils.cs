@@ -46,6 +46,10 @@ namespace XModPackager
 
                 return null;
             }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                return Path.GetFullPath("~/.local/share/steam");
+            }
 
             return null;
         }

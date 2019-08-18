@@ -23,7 +23,7 @@ namespace XModPackager.Build
         }
 
 
-        public void BuildModFiles(string outputDirectory, IEnumerable<string> filesFromDisk, IDictionary<string, string> filesFromMemory)
+        public void BuildModFiles(string outputDirectory, IEnumerable<string> filesFromDisk, string contentFileText)
         {
             if (config.Build.ArchiveName == null)
             {
@@ -37,18 +37,12 @@ namespace XModPackager.Build
 
             using (var zipFile = new ZipFile())
             {
-                var filesFromDiskOnly = filesFromDisk.Where(file => (
-                    !filesFromMemory.Keys.Contains(file)
-                ));
 
                 try
                 {
-                    foreach (var fileFromMemory in filesFromMemory)
-                    {
-                        zipFile.UpdateEntry(fileFromMemory.Key, fileFromMemory.Value);
-                    }
+                    zipFile.UpdateEntry("content.xml", contentFileText);
 
-                    zipFile.AddFiles(filesFromDiskOnly);
+                    zipFile.AddFiles(filesFromDisk);
 
                     zipFile.Save(archivePath);
                 }

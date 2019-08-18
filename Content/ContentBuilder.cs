@@ -3,19 +3,18 @@ using System;
 using System.IO;
 using System.Xml.Linq;
 using XModPackager.Config.Models;
+using XModPackager.Build;
 
 namespace XModPackager.Content
 {
     public class ContentBuilder
     {
-        private readonly ConfigModel config;
-        private readonly bool workshopMode;
+        private readonly BuildContext context;
         private XDocument contentDocument;
 
-        public ContentBuilder(ConfigModel config, bool workshopMode)
+        public ContentBuilder(BuildContext context)
         {
-            this.config = config;
-            this.workshopMode = workshopMode;
+            this.context = context;
         }
 
         private void AssertDocumentExists()
@@ -45,13 +44,17 @@ namespace XModPackager.Content
         {
             var root = contentDocument.Root;
 
-            root.SetAttributeValue("id", config.ModDetails.Id);
-            root.SetAttributeValue("name", config.ModDetails.Title);
-            root.SetAttributeValue("description", config.ModDetails.Description);
-            root.SetAttributeValue("author", config.ModDetails.Author);
-            root.SetAttributeValue("version", config.ModDetails.Version);
+            var idToUse = context.Options.Workshop
+                ? context.Config.ModDetails.WorkshopId
+                : context.Config.ModDetails.Id;
+
+            root.SetAttributeValue("id", idToUse != null ? idToUse : "");
+            root.SetAttributeValue("name", context.Config.ModDetails.Title);
+            root.SetAttributeValue("description", context.Config.ModDetails.Description);
+            root.SetAttributeValue("author", context.Config.ModDetails.Author);
+            root.SetAttributeValue("version", context.Config.ModDetails.Version);
             root.SetAttributeValue("date", DateTime.Now.ToString("yyyy-MM-dd"));
-            root.SetAttributeValue("save", config.ModDetails.SaveDependent.Value ? null : "0");
+            root.SetAttributeValue("save", context.Config.ModDetails.SaveDependent.Value ? null : "0");
         }
 
         private XElement GetLangElement(string langId)
@@ -72,7 +75,7 @@ namespace XModPackager.Content
                 contentDocument.Root.Add(langElement);
             }
 
-            var langText = config.ModDetails.GetInfoForLanguage(langId);
+            var langText = context.Config.ModDetails.GetInfoForLanguage(langId);
 
             langElement.SetAttributeValue("language", langId);
             langElement.SetAttributeValue("name", langText.Title);
@@ -87,7 +90,7 @@ namespace XModPackager.Content
                 ApplyLang(langId);
             }
 
-            foreach (var langId in config.ModDetails.Langs.Keys)
+            foreach (var langId in context.Config.ModDetails.Langs.Keys)
             {
                 ApplyLang(langId);
             }
@@ -103,7 +106,7 @@ namespace XModPackager.Content
 
         private void ApplyDependency(ConfigDependencyModel dependency)
         {
-            var idToUse = dependency.GetId(workshopMode);
+            var idToUse = dependency.GetId(context.Options.Workshop);
 
             var dependencyElement = GetModDependencyElement(idToUse);
 
@@ -120,7 +123,7 @@ namespace XModPackager.Content
 
         private void ApplyDependencies()
         {
-            foreach (var dependency in config.ModDetails.Dependencies)
+            foreach (var dependency in context.Config.ModDetails.Dependencies)
             {
                 ApplyDependency(dependency);
             }

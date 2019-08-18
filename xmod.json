@@ -3,7 +3,16 @@
         "id": "jimble_mod",
         "title": "Jimble's Funky Mod (beta)",
         "author": "Jimbles",
-        "version": "150"
+        "version": "150",
+
+        "dependencies": [
+            {
+                "id": "cool_other_mod",
+                "workshopId": "ws12345",
+                "version": "123",
+                "optional": true
+            }
+        ]
     },
 
     "build": {

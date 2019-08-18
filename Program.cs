@@ -81,9 +81,14 @@ namespace XModPackager
             }
         }
 
-        private static void BuildMod(BuildOptions options, ConfigModel config)
+        private static void BuildMod(BuildContext context)
         {
-            var contentBuilder = new ContentBuilder(config, false);
+            var contentBuilder = new ContentBuilder(context);
+
+            if (context.Options.Workshop && context.Method != BuildMethod.Cat)
+            {
+                Logger.Log(LogCategory.Warning, "You have specified workshop mode, but the build method is not catalogs. Is this intentional?");
+            }
 
             XDocument contentDocument;
             try
@@ -108,45 +113,43 @@ namespace XModPackager
                 contentDocument.WriteTo(contentWriter);
             }
 
-            var filesToPackage = new BuildPathsProcessor(config).GetPathsToBuild(Directory.GetCurrentDirectory());
+            var filesToPackage = new BuildPathsProcessor(context.Config).GetPathsToBuild(Directory.GetCurrentDirectory());
 
             try
             {
-                Logger.Log(LogCategory.Info, "Building mod to directory " + config.Build.OutputDirectory);
-                Directory.CreateDirectory(config.Build.OutputDirectory);
+                Logger.Log(LogCategory.Info, "Building mod to directory " + context.Config.Build.OutputDirectory);
+                Directory.CreateDirectory(context.Config.Build.OutputDirectory);
             }
             catch (Exception e)
             {
                 throw new Exception(
-                    $"Failed to create build output directory at {config.Build.OutputDirectory}: " + e.Message,
+                    $"Failed to create build output directory at {context.Config.Build.OutputDirectory}: " + e.Message,
                     e
                 );
             }
 
             IModFilesBuilder builder;
-            var buildOutputPath = config.Build.OutputDirectory;
+            var buildOutputPath = context.Config.Build.OutputDirectory;
 
-            switch (config.Build.Method)
+            switch (context.Method)
             {
                 case BuildMethod.Loose:
                     builder = new LooseModFilesBuilder();
                     Logger.Log(LogCategory.Info, "Using build method: loose files");
                     break;
                 case BuildMethod.Archive:
-                    builder = new ArchiveModFilesBuilder(config, GetTemplateSpecs(config));
+                    builder = new ArchiveModFilesBuilder(context.Config, GetTemplateSpecs(context.Config));
                     Logger.Log(LogCategory.Info, "Using build method: zip archive");
                     break;
                 case BuildMethod.Cat:
-                    builder = new CatModFilesBuilder(config);
+                    builder = new CatModFilesBuilder(context.Config);
                     Logger.Log(LogCategory.Info, "Using build method: catalogs");
                     break;
                 default:
-                    throw new ArgumentException("Invalid build method: " + config.Build.Method);
+                    throw new ArgumentException("Invalid build method: " + context.Config.Build.Method);
             }
 
-            builder.BuildModFiles(buildOutputPath, filesToPackage, new Dictionary<string, string> {
-                ["content.xml"] = contentStringBuilder.ToString()
-            });
+            builder.BuildModFiles(buildOutputPath, filesToPackage, contentStringBuilder.ToString());
         }
 
         static int Main(string[] args)
@@ -167,7 +170,7 @@ namespace XModPackager
                 PathUtils.CheckOutputPath(config.Build.OutputDirectory);
 
                 Parser.Default.ParseArguments<BuildOptions, CleanOptions>(args)
-                    .WithParsed((BuildOptions options) => BuildMod(options, config))
+                    .WithParsed((BuildOptions options) => BuildMod(new BuildContext(config, options)))
                     .WithParsed((CleanOptions options) => CleanOutputDirectory(options, config));
             }
             catch (Exception e)

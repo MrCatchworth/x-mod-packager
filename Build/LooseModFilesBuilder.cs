@@ -1,6 +1,5 @@
 using System.IO;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace XModPackager.Build
 {
@@ -19,29 +18,19 @@ namespace XModPackager.Build
             cachedDirectoriesCreated.Add(directory);
         }
 
-        public void BuildModFiles(string outputPath, IEnumerable<string> filesFromDisk, IDictionary<string, string> filesFromMemory)
+        public void BuildModFiles(string outputPath, IEnumerable<string> filesFromDisk, string contentFileText)
         {
             cachedDirectoriesCreated.Clear();
 
-            var filesFromDiskOnly = filesFromDisk.Where(file => (
-                !filesFromMemory.Keys.Contains(file)
-            ));
-
-            foreach (var fileFromMemory in filesFromMemory)
-            {
-                var fileOutputPath = Path.Combine(outputPath, fileFromMemory.Key);
-
-                ensureDirectoryExists(Path.GetDirectoryName(fileOutputPath));
-                File.WriteAllText(fileOutputPath, fileFromMemory.Value);
-            }
-
-            foreach (var sourceFilePath in filesFromDiskOnly)
+            foreach (var sourceFilePath in filesFromDisk)
             {
                 var fileOutputPath = Path.Combine(outputPath, sourceFilePath);
 
                 ensureDirectoryExists(Path.GetDirectoryName(fileOutputPath));
                 File.Copy(sourceFilePath, fileOutputPath);
             }
+
+            File.WriteAllText(Path.Combine(outputPath, "content.xml"), contentFileText);
         }
     }
 }

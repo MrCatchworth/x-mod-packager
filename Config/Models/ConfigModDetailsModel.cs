@@ -10,6 +10,7 @@ namespace XModPackager.Config.Models
 
         [JsonProperty(Required = Required.Always)]
         public string Id { get; set; }
+        public string WorkshopId { get; set; }
 
         [JsonProperty(Required = Required.Always)]
         public string Title { get; set; }
@@ -42,7 +43,8 @@ namespace XModPackager.Config.Models
         {
             if (Langs.TryGetValue(langId, out var existingLang))
             {
-                return new ConfigLangModel {
+                return new ConfigLangModel
+                {
                     Title = existingLang.Title != null ? existingLang.Title : Title,
                     Description = existingLang.Description != null ? existingLang.Description : Description,
                     Author = existingLang.Author != null ? existingLang.Author : Author
@@ -50,7 +52,8 @@ namespace XModPackager.Config.Models
             }
             else
             {
-                return new ConfigLangModel {
+                return new ConfigLangModel
+                {
                     Title = Title,
                     Description = Description,
                     Author = Author
