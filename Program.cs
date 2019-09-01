@@ -85,7 +85,7 @@ namespace XModPackager
         {
             var contentBuilder = new ContentBuilder(context);
 
-            if (context.Options.Workshop && context.Method != BuildMethod.Cat)
+            if (context.Options.Workshop && context.Method != BuildMethod.Cats)
             {
                 Logger.Log(LogCategory.Warning, "You have specified workshop mode, but the build method is not catalogs. Is this intentional?");
             }
@@ -141,7 +141,7 @@ namespace XModPackager
                     builder = new ArchiveModFilesBuilder(context.Config, GetTemplateSpecs(context.Config));
                     Logger.Log(LogCategory.Info, "Using build method: zip archive");
                     break;
-                case BuildMethod.Cat:
+                case BuildMethod.Cats:
                     builder = new CatModFilesBuilder(context.Config);
                     Logger.Log(LogCategory.Info, "Using build method: catalogs");
                     break;

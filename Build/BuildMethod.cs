@@ -4,6 +4,6 @@ namespace XModPackager.Build
     {
         Loose,
         Archive,
-        Cat
+        Cats
     }
 }
