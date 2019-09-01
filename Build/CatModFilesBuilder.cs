@@ -20,7 +20,6 @@ namespace XModPackager.Build
         public void BuildModFiles(string outputPath, IEnumerable<string> filesFromDisk, string contentFileText)
         {
             var filesLeftToWrite = new List<string>(filesFromDisk);
-            Logger.Log(LogCategory.Info, string.Join("\n", filesLeftToWrite));
 
             var looseFilesToWrite = filesLeftToWrite.Where(path => config.Build.CatLoosePaths.Any(regex => regex.IsMatch(path))).ToList();
             foreach (var loosePath in looseFilesToWrite) {
@@ -50,8 +49,7 @@ namespace XModPackager.Build
             foreach (var loosePath in looseFilesToWrite)
             {
                 var fileOutputPath = Path.Combine(outputPath, loosePath);
-                Directory.CreateDirectory(Path.GetDirectoryName(fileOutputPath));
-                File.Copy(loosePath, fileOutputPath);
+                FileUtils.CopyAndCreateDirectory(loosePath, fileOutputPath, true);
             }
         }
     }
