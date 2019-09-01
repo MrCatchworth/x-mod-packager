@@ -38,7 +38,8 @@ namespace XModPackager.Build
                     catFile.Entries.Add(new XCatalogEntry(catItemPath));
                 }
 
-                catFile.Write(catPath);
+                var catFullPath = Path.Combine(config.Build.OutputDirectory, catPath);
+                catFile.Write(catFullPath);
             }
 
             var contentPath = Path.Combine(config.Build.OutputDirectory, "content.xml");
