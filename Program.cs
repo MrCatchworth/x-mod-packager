@@ -13,6 +13,7 @@ using XModPackager.Options;
 using XModPackager.Content;
 using XModPackager.Build;
 using XModPackager.Logging;
+using XModPackager.Config;
 
 namespace XModPackager
 {
@@ -62,7 +63,10 @@ namespace XModPackager
 
         static ConfigModel LoadConfig()
         {
-            return JsonConvert.DeserializeObject<ConfigModel>(File.ReadAllText(PathUtils.ConfigPath));
+            var config = ConfigDefaults.GetDefaultConfig();
+            JsonConvert.PopulateObject(File.ReadAllText(PathUtils.ConfigPath), config);
+
+            return config;
         }
 
         private static void CleanOutputDirectory(CleanOptions options, ConfigModel config)
@@ -154,24 +158,48 @@ namespace XModPackager
 
         static int Main(string[] args)
         {
-            ConfigModel config;
             try
             {
-                config = LoadConfig();
-            }
-            catch (Exception e)
-            {
-                Logger.Log(LogCategory.Fatal, "Failed to load config: " + e.Message);
-                return 1;
-            }
+                ConfigModel config = null;
+                object options = null;
 
-            try
-            {
-                PathUtils.CheckOutputPath(config.Build.OutputDirectory);
+                Parser.Default.ParseArguments<BuildOptions, CleanOptions, ImportOptions>(args)
+                    .WithParsed(o => options = o);
 
-                Parser.Default.ParseArguments<BuildOptions, CleanOptions>(args)
-                    .WithParsed((BuildOptions options) => BuildMod(new BuildContext(config, options)))
-                    .WithParsed((CleanOptions options) => CleanOutputDirectory(options, config));
+                if (options == null)
+                {
+                    return 1;
+                }
+
+                var shouldLoadConfig = !(options is ImportOptions);
+
+                if (shouldLoadConfig)
+                {
+                    try
+                    {
+                        config = LoadConfig();
+                    }
+                    catch (Exception e)
+                    {
+                        Logger.Log(LogCategory.Fatal, "Failed to load config: " + e.Message);
+                        return 1;
+                    }
+
+                    PathUtils.CheckOutputPath(config.Build.OutputDirectory);
+                }
+
+                if (options is BuildOptions buildOptions)
+                {
+                    BuildMod(new BuildContext(config, buildOptions));
+                }
+                else if (options is CleanOptions cleanOptions)
+                {
+                    CleanOutputDirectory(cleanOptions, config);
+                }
+                else if (options is ImportOptions importOptions)
+                {
+                    InitScript.ImportContentXml(importOptions);
+                }
             }
             catch (Exception e)
             {

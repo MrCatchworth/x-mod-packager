@@ -14,7 +14,7 @@ namespace XModPackager.Config.Models
 
         [JsonProperty(Required = Required.Always)]
         public string Title { get; set; }
-        public string Description { get; set; } = "";
+        public string Description { get; set; }
 
         [JsonProperty(Required = Required.Always)]
         public string Author { get; set; }
@@ -37,7 +37,7 @@ namespace XModPackager.Config.Models
                 version = value;
             }
         }
-        public bool? SaveDependent { get; set; } = true;
+        public bool? SaveDependent { get; set; }
 
         public ConfigLangModel GetInfoForLanguage(string langId)
         {
