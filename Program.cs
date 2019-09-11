@@ -163,7 +163,7 @@ namespace XModPackager
                 ConfigModel config = null;
                 object options = null;
 
-                Parser.Default.ParseArguments<BuildOptions, CleanOptions, ImportOptions>(args)
+                Parser.Default.ParseArguments<BuildOptions, CleanOptions, ImportOptions, InitOptions>(args)
                     .WithParsed(o => options = o);
 
                 if (options == null)
@@ -171,7 +171,7 @@ namespace XModPackager
                     return 1;
                 }
 
-                var shouldLoadConfig = !(options is ImportOptions);
+                var shouldLoadConfig = options is BuildOptions || options is CleanOptions;
 
                 if (shouldLoadConfig)
                 {
@@ -200,10 +200,18 @@ namespace XModPackager
                 {
                     InitScript.ImportContentXml(importOptions);
                 }
+                else if (options is InitOptions initOptions)
+                {
+                    InitScript.InitNewConfig(initOptions);
+                }
             }
             catch (Exception e)
             {
                 Logger.Log(LogCategory.Fatal, e.Message);
+                if (e.InnerException != null)
+                {
+                    Logger.Log(LogCategory.Info, e.StackTrace);
+                }
                 return 1;
             }
 

@@ -18,6 +18,7 @@ namespace XModPackager.Config.Models
 
         [JsonProperty(Required = Required.Always)]
         public string Author { get; set; }
+        public string GameVersion { get; set; }
         public Dictionary<string, ConfigLangModel> Langs { get; set; } = new Dictionary<string, ConfigLangModel>();
         public IEnumerable<ConfigDependencyModel> Dependencies { get; set; } = new List<ConfigDependencyModel>();
 

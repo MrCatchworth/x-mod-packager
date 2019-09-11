@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Xml.Linq;
 using System.IO;
 using System;
@@ -7,11 +8,25 @@ using XModPackager.Options;
 using XModPackager.Logging;
 using System.Collections.Generic;
 using Newtonsoft.Json.Serialization;
+using XModPackager.Config;
 
 namespace XModPackager
 {
     internal static class InitScript
     {
+        private static string SerialiseConfig(ConfigModel config)
+        {
+            var serialiserSettings = new JsonSerializerSettings {
+                Formatting = Formatting.Indented,
+                NullValueHandling = NullValueHandling.Ignore,
+                ContractResolver = new DefaultContractResolver {
+                    NamingStrategy = new CamelCaseNamingStrategy()
+                }
+            };
+
+            return JsonConvert.SerializeObject(config, serialiserSettings);
+        }
+
         private static TResult ReadFromPrompt<TResult>(string prompt, Func<string, TResult> responseParser, bool hasDefaultResponse, TResult defaultResponse)
         {
             var complete = false;
@@ -143,17 +158,57 @@ namespace XModPackager
                     }
                 }
 
+                var gameVersionElement = dependencyElements.FirstOrDefault(ele => {
+                    var attributes = ele.Attributes().ToList();
+                    return attributes.Count == 1 && attributes[0].Name == "version";
+                });
+
+                var gameVersionValue = gameVersionElement != null ? gameVersionElement.Attributes().SingleOrDefault() : null;
+
+                if (gameVersionValue != null)
+                {
+                    Logger.Log(LogCategory.Info, "Required game version: " + gameVersionValue.Value);
+                    config.ModDetails.GameVersion = gameVersionValue.Value;
+                }
+
                 config.ModDetails.Dependencies = dependencyList;
 
-                var serialiserSettings = new JsonSerializerSettings {
-                    Formatting = Formatting.Indented,
-                    NullValueHandling = NullValueHandling.Ignore,
-                    ContractResolver = new DefaultContractResolver {
-                        NamingStrategy = new CamelCaseNamingStrategy()
+                var newConfigText = SerialiseConfig(config);
+                try
+                {
+                    using (var file = File.Open(PathUtils.ConfigPath, FileMode.CreateNew))
+                    {
+                        var writer = new StreamWriter(file);
+                        writer.Write(newConfigText);
+                        writer.Flush();
                     }
-                };
+                }
+                catch (Exception e)
+                {
+                    throw new Exception("Failed to write generated config file: " + e.Message);
+                }
+            }
+            catch (Exception e)
+            {
+                Logger.Log(LogCategory.Error, "Could not import config from content.xml: " + e.Message);
+                if (e.StackTrace != null)
+                {
+                    Logger.Log(LogCategory.Info, e.StackTrace);
+                }
+            }
+        }
 
-                var newConfigText = JsonConvert.SerializeObject(config, serialiserSettings);
+        public static void InitNewConfig(InitOptions options)
+        {
+            if (File.Exists(PathUtils.ConfigPath))
+            {
+                Logger.Log(LogCategory.Warning, "This project already has a config file");
+            }
+
+            Logger.Log(LogCategory.Info, $"Writing new config file to {PathUtils.ConfigPath} ...");
+            var newConfigText = SerialiseConfig(ConfigDefaults.GetMinimalUserConfig());
+            try
+            {
                 using (var file = File.Open(PathUtils.ConfigPath, FileMode.CreateNew))
                 {
                     var writer = new StreamWriter(file);
@@ -163,7 +218,13 @@ namespace XModPackager
             }
             catch (Exception e)
             {
-                Logger.Log(LogCategory.Error, "Could not import config from content.xml: " + e.Message);
+                throw new Exception("Failed to write new config file: " + e.Message, e);
+            }
+
+            var defaultConfigInstance = ConfigDefaults.GetDefaultConfig();
+            if (!Directory.Exists(defaultConfigInstance.Build.OutputDirectory))
+            {
+                Logger.Log(LogCategory.Info, $"Creating your build output folder at {defaultConfigInstance.Build.OutputDirectory} ...");
             }
         }
     }
