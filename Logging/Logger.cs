@@ -7,7 +7,7 @@ namespace XModPackager.Logging
 {
     public static class Logger
     {
-        public static LogCategory MinLogLevel {get; private set;} = LogCategory.Info;
+        public static LogCategory MinLogLevel {get; set;} = LogCategory.Info;
 
         private static readonly Regex LogHeaderPositionRegex = new Regex("^|\n|\r\n|\r");
 

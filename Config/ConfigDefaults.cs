@@ -20,7 +20,7 @@ namespace XModPackager.Config
                     Method = BuildMethod.Archive,
                     ArchiveName = "{id}_{date}.zip",
                     OutputDirectory = ".xmodbuild",
-                    ExcludePaths = new Regex[] {
+                    ExcludePaths = new List<Regex> {
                         new Regex("^" + Regex.Escape(PathUtils.ConfigPath) + "$"),
                         new Regex("^" + Regex.Escape(PathUtils.ContentTemplatePath) + "$"),
                         new Regex(@"(^|[/\\])\.")
@@ -41,13 +41,13 @@ namespace XModPackager.Config
                     Description = "",
                     GameVersion = "100",
                     WorkshopId = "",
-                    Dependencies = new ConfigDependencyModel[] {}
+                    Dependencies = new List<ConfigDependencyModel>()
                 },
                 Build = {
                     Method = BuildMethod.Archive,
                     ArchiveName = "{id}_{version}_{date}.zip",
-                    Cats = new Dictionary<string, IEnumerable<Regex>> {
-                        ["ext_01"] = new Regex[] {new Regex(".*")}
+                    Cats = new Dictionary<string, IList<Regex>> {
+                        ["ext_01"] = new List<Regex> {new Regex(".*")}
                     }
                 }
             };

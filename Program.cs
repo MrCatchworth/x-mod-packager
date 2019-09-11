@@ -14,6 +14,7 @@ using XModPackager.Content;
 using XModPackager.Build;
 using XModPackager.Logging;
 using XModPackager.Config;
+using System.Linq;
 
 namespace XModPackager
 {
@@ -64,7 +65,9 @@ namespace XModPackager
         static ConfigModel LoadConfig()
         {
             var config = ConfigDefaults.GetDefaultConfig();
-            JsonConvert.PopulateObject(File.ReadAllText(PathUtils.ConfigPath), config);
+            JsonConvert.PopulateObject(File.ReadAllText(PathUtils.ConfigPath), config, new JsonSerializerSettings {
+                ObjectCreationHandling = ObjectCreationHandling.Reuse
+            });
 
             return config;
         }
@@ -117,7 +120,13 @@ namespace XModPackager
                 contentDocument.WriteTo(contentWriter);
             }
 
+            Logger.Log(LogCategory.Debug, $"{context.Config.Build.ExcludePaths.Count()} excluded path patterns:");
+            Logger.Log(LogCategory.Debug, string.Join("\n", context.Config.Build.ExcludePaths));
+
             var filesToPackage = new BuildPathsProcessor(context.Config).GetPathsToBuild(Directory.GetCurrentDirectory());
+
+            Logger.Log(LogCategory.Debug, $"{filesToPackage.Count} files to build:");
+            Logger.Log(LogCategory.Debug, string.Join("\n", filesToPackage));
 
             try
             {
@@ -161,14 +170,23 @@ namespace XModPackager
             try
             {
                 ConfigModel config = null;
-                object options = null;
+                BaseOptions options = null;
 
                 Parser.Default.ParseArguments<BuildOptions, CleanOptions, ImportOptions, InitOptions>(args)
-                    .WithParsed(o => options = o);
+                    .WithParsed(o => options = (BaseOptions)o);
 
                 if (options == null)
                 {
                     return 1;
+                }
+
+                if (options.Verbose)
+                {
+                    Logger.MinLogLevel = LogCategory.Debug;
+                }
+                if (options.Quiet)
+                {
+                    Logger.MinLogLevel = LogCategory.Warning;
                 }
 
                 var shouldLoadConfig = options is BuildOptions || options is CleanOptions;

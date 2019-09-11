@@ -15,8 +15,8 @@ namespace XModPackager.Config.Models
         public string ArchiveName { get; set; }
         public string OutputDirectory { get; set; }
         [JsonProperty(ItemConverterType = typeof(RegexConverter))]
-        public IEnumerable<Regex> ExcludePaths { get; set; }
-        public Dictionary<string, IEnumerable<Regex>> Cats { get; set; } = new Dictionary<string, IEnumerable<Regex>>();
-        public IEnumerable<Regex> CatLoosePaths { get; set; } = new List<Regex>();
+        public IList<Regex> ExcludePaths { get; set; }
+        public Dictionary<string, IList<Regex>> Cats { get; set; } = new Dictionary<string, IList<Regex>>();
+        public IList<Regex> CatLoosePaths { get; set; } = new List<Regex>();
     }
 }
